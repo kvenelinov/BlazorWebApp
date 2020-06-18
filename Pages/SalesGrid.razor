@@ -1,0 +1,29 @@
+﻿@page "/salesGrid"
+
+@using BlazorApp.Data
+
+@inject SalesService salesService
+
+<TelerikGrid Data="@sales"FilterMode="@GridFilterMode.FilterMenu"
+                         Sortable="true" Pageable="true" PageSize="10" Groupable="true" Resizable="true" Reorderable="true">
+    <GridColumns>
+        <GridColumn Field="SalesOrderId" Title="Id" Groupable="false" />
+        <GridColumn Field="OrderDate" Title="Order Date" />
+        <GridColumn Field="CustomerId" Title="Customer Id" />
+        <GridColumn Field="TotalDue" Title="Total sum" />
+    </GridColumns>
+</TelerikGrid>
+
+@code {
+    List<Data.Model.SalesOrderHeader> sales;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await load();
+    }
+
+    protected async Task load()
+    {
+        sales = await salesService.GetSalesAsync();
+    }
+}

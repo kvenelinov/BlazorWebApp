@@ -1,0 +1,44 @@
+﻿@page "/salesChart"
+
+@using BlazorApp.Data
+
+@inject SalesService salesService
+
+    <TelerikChart>
+        <ChartTitle Text="Sum of product sales per order date"></ChartTitle>
+        <ChartLegend Position="ChartLegendPosition.Bottom"></ChartLegend>
+
+        <ChartSeriesItems>
+            <ChartSeries Type="ChartSeriesType.Line" Name="Sales" Data="@chartData" Field="@nameof(Data.Model.SalesOrderHeader.TotalDue)"></ChartSeries>
+        </ChartSeriesItems>
+
+        <ChartCategoryAxes>
+            <ChartCategoryAxis Categories="@chartCategories"></ChartCategoryAxis>
+        </ChartCategoryAxes>
+    </TelerikChart>
+
+@code {
+    List<Data.Model.SalesOrderHeader> chartData;
+    string[] chartCategories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await load();
+    }
+
+    protected async Task load()
+    {
+        List<Data.Model.SalesOrderHeader> sales = await salesService.GetSalesAsync();
+
+        chartData = sales.GroupBy(s => new { s.OrderDate, s.TotalDue })
+            .Select(s => new Data.Model.SalesOrderHeader
+            {
+                SalesOrderId = s.First().SalesOrderId,
+                OrderDate = s.First().OrderDate,
+                CustomerId = s.First().CustomerId,
+                TotalDue = s.Sum(x => Convert.ToInt32(x.TotalDue))
+            }).ToList();
+
+        chartCategories = sales.Select(s => s.OrderDate.Date.ToString()).ToArray();
+    }
+}
