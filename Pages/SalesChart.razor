@@ -4,7 +4,7 @@
 
 @inject SalesService salesService
 
-    <TelerikChart>
+    <TelerikChart Type>
         <ChartTitle Text="Sum of product sales per order date"></ChartTitle>
         <ChartLegend Position="ChartLegendPosition.Bottom"></ChartLegend>
 
@@ -30,15 +30,17 @@
     {
         List<Data.Model.SalesOrderHeader> sales = await salesService.GetSalesAsync();
 
-        chartData = sales.GroupBy(s => new { s.OrderDate, s.TotalDue })
-            .Select(s => new Data.Model.SalesOrderHeader
-            {
-                SalesOrderId = s.First().SalesOrderId,
-                OrderDate = s.First().OrderDate,
-                CustomerId = s.First().CustomerId,
-                TotalDue = s.Sum(x => Convert.ToInt32(x.TotalDue))
+        chartData = sales.GroupBy(s => s.OrderDate)
+            .Select(s => {
+                return new Data.Model.SalesOrderHeader
+                {
+                    SalesOrderId = s.First().SalesOrderId,
+                    OrderDate = s.First().OrderDate,
+                    CustomerId = s.First().CustomerId,
+                    TotalDue = s.Sum(x => Convert.ToInt32(x.TotalDue))
+                };
             }).ToList();
 
-        chartCategories = sales.Select(s => s.OrderDate.Date.ToString()).ToArray();
+        chartCategories = chartData.Select(s => s.OrderDate.Date.ToString()).ToArray();
     }
 }
